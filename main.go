@@ -29,7 +29,12 @@ func main() {
 
 // Handler
 func getStudents(c echo.Context) error {
-	return c.String(http.StatusOK, "List of all students")
+	students, err := db.GetStudents()
+	if err != nil {
+		return c.String(http.StatusNotFound, "Students not found")
+
+	}
+	return c.JSON(http.StatusOK, students)
 }
 
 func createStudent(c echo.Context) error {
@@ -38,7 +43,10 @@ func createStudent(c echo.Context) error {
 		return err
 	}
 
-	db.AddStudent(student)
+	if err := db.AddStudent(student); err != nil {
+		return c.String(http.StatusInternalServerError, "Error creating student")
+	}
+
 	return c.String(http.StatusCreated, "Student created")
 }
 
