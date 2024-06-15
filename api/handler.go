@@ -42,9 +42,6 @@ func (api *API) getStudent(c echo.Context) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.String(http.StatusNotFound, "Student not found")
 	}
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to get Student")
-	}
 
 	return c.JSON(http.StatusOK, student)
 }
@@ -55,6 +52,15 @@ func (api *API) updateStudent(c echo.Context) error {
 }
 
 func (api *API) deleteStudent(c echo.Context) error {
-	id := c.Param("id")
-	return c.String(http.StatusOK, "Student deleted with id: "+id)
+	id, err := strconv.Atoi(c.Param("id"))
+	student, err := api.DB.GetStudent(id)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to get Student id")
+	}
+	api.DB.DeleteStudent(student)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.String(http.StatusNotFound, "Student not found")
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
 }
