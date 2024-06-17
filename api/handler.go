@@ -18,6 +18,18 @@ func (api *API) getStudents(c echo.Context) error {
 
 	}
 
+	active := c.QueryParam("active")
+
+	if active != "" {
+		act, err := strconv.ParseBool(active)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to parse active query param")
+			return c.String(http.StatusBadRequest, "Failed to parse active query param")
+		}
+
+		students, err = api.DB.GetFilteredStudents(act)
+	}
+
 	listOfStudents := map[string][]schemas.StudentResponse{"students": schemas.NewResponse(students)}
 	return c.JSON(http.StatusOK, listOfStudents)
 }
