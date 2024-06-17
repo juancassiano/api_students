@@ -43,7 +43,7 @@ func (api *API) createStudent(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error creating student")
 	}
 
-	return c.String(http.StatusCreated, "Student created")
+	return c.JSON(http.StatusCreated, student)
 }
 
 func (api *API) getStudent(c echo.Context) error {
