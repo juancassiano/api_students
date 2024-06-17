@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/juancassiano/api_students/db"
+	"github.com/juancassiano/api_students/schemas"
 	"github.com/labstack/echo"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -20,9 +21,22 @@ func (api *API) getStudents(c echo.Context) error {
 }
 
 func (api *API) createStudent(c echo.Context) error {
-	student := db.Student{}
-	if err := c.Bind(&student); err != nil {
+	studentRequest := StudentRequest{}
+
+	if err := c.Bind(&studentRequest); err != nil {
 		return err
+	}
+	if err := studentRequest.Validate(); err != nil {
+		log.Error().Err(err).Msgf("Failed to validate student request")
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	student := schemas.Student{
+		Name:   studentRequest.Name,
+		CPF:    studentRequest.CPF,
+		Email:  studentRequest.Email,
+		Age:    studentRequest.Age,
+		Active: *studentRequest.Active,
 	}
 
 	if err := api.DB.AddStudent(student); err != nil {
